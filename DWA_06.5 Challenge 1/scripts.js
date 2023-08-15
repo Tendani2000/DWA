@@ -12,9 +12,10 @@ document.querySelector('[data-list-items]').appendChild(starting)
 // The function abstracts away the complexity of creating an option element.
 // This abstraction encapsulates the logic into one reusable function.
 function createOptionElement(value, text) {
-const element = document.createElement('option')
-element.value = value
-element.innerText = text
+    const element = document.createElement('option')
+    element.value = value
+    element.innerText = text
+    return element;
 }
 
 // Append the genre options to the genre html
@@ -61,12 +62,12 @@ document.querySelector('[data-settings-cancel]').addEventListener('click', () =>
 })
 
 document.querySelector('[data-header-search]').addEventListener('click', () => {
-    document.querySelector('[data-search-overlay]').open = true 
+    document.querySelector('[data-search-overlay]').open = true
     document.querySelector('[data-search-title]').focus()
 })
 
 document.querySelector('[data-header-settings]').addEventListener('click', () => {
-    document.querySelector('[data-settings-overlay]').open = true 
+    document.querySelector('[data-settings-overlay]').open = true
 })
 
 document.querySelector('[data-list-close]').addEventListener('click', () => {
@@ -88,8 +89,8 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
         }
 
         if (
-            (filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase())) && 
-            (filters.author === 'any' || book.author === filters.author) && 
+            (filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase())) &&
+            (filters.author === 'any' || book.author === filters.author) &&
             genreMatch
         ) {
             result.push(book)
@@ -112,7 +113,7 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
         const element = document.createElement('button')
         element.classList = 'preview'
         element.setAttribute('data-preview', id)
-    
+
         element.innerHTML = `
             <img
                 class="preview__image"
@@ -136,7 +137,7 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
         <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
     `
 
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     document.querySelector('[data-search-overlay]').open = false
 })
 
@@ -147,7 +148,7 @@ document.querySelector('[data-list-button]').addEventListener('click', () => {
         const element = document.createElement('button')
         element.classList = 'preview'
         element.setAttribute('data-preview', id)
-    
+
         element.innerHTML = `
             <img
                 class="preview__image"
