@@ -1,6 +1,6 @@
 import { BOOKS_PER_PAGE, authors, genres, books } from "./data.js";
 import { handleSearchFormSubmit, handleSettingsFormSubmit, renderDropdownOptions, handleFilterAndRender } from "./eventHandlers.js";
-import { createPreviewFragment,  } from "./previewElement.js";
+import { createPreview, createPreviewFragment } from "./previewElement.js"
 
 // Add submit event listeners to search and settings forms
 document.querySelector('[data-search-form]').addEventListener('submit', handleSearchFormSubmit);
@@ -109,3 +109,15 @@ document.querySelector('[data-list-subtitle]').textContent = `${authors[active.a
 document.querySelector('[data-list-description]').textContent = active.description;
 
 });
+
+// Loop to create and append previews to fragment
+for (let i = 0; i < extracted.length; i++) {
+  const { author, image, title, id } = extracted[i];
+  const preview = createPreview({
+    author,
+    id,
+    image,
+    title
+  });
+  fragment.appendChild(preview);
+}
