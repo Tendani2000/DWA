@@ -1,7 +1,7 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 import { handleListItemsClick } from './clickEvent.js';
 import { addBooksToPage } from './booksToPage.js';
-import { handleSearchFormSubmit, resetPagination, updateBookList, createBookElement, updateListButtonLabel, scrollToTop, closeSearchOverlay } from './searchFunctions.js';
+import { createGenreDropdown, createAuthorsDropdown } from './genreDropdown.js';
 
 let page = 1;
 let matches = books
@@ -29,35 +29,9 @@ for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
 
 document.querySelector('[data-list-items]').appendChild(starting)
 
-const genreHtml = document.createDocumentFragment()
-const firstGenreElement = document.createElement('option')
-firstGenreElement.value = 'any'
-firstGenreElement.innerText = 'All Genres'
-genreHtml.appendChild(firstGenreElement)
+createGenreDropdown(genres);
 
-for (const [id, name] of Object.entries(genres)) {
-    const element = document.createElement('option')
-    element.value = id
-    element.innerText = name
-    genreHtml.appendChild(element)
-}
-
-document.querySelector('[data-search-genres]').appendChild(genreHtml)
-
-const authorsHtml = document.createDocumentFragment()
-const firstAuthorElement = document.createElement('option')
-firstAuthorElement.value = 'any'
-firstAuthorElement.innerText = 'All Authors'
-authorsHtml.appendChild(firstAuthorElement)
-
-for (const [id, name] of Object.entries(authors)) {
-    const element = document.createElement('option')
-    element.value = id
-    element.innerText = name
-    authorsHtml.appendChild(element)
-}
-
-document.querySelector('[data-search-authors]').appendChild(authorsHtml)
+createAuthorsDropdown(authors);
 
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.querySelector('[data-settings-theme]').value = 'night'
@@ -115,25 +89,71 @@ document.querySelector('[data-settings-form]').addEventListener('submit', (event
 })
 
 document.querySelector('[data-search-form]').addEventListener('submit', (event) => {
-    handleSearchFormSubmit(event, books, authors, BOOKS_PER_PAGE);
-});
+    event.preventDefault()
+    const formData = new FormData(event.target)
+    const filters = Object.fromEntries(formData)
+    const result = []
 
-resetPagination();
+    for (const book of books) {
+        let genreMatch = filters.genre === 'any'
 
-// Update the book list initially (when the page loads)
-updateBookList(books, authors, BOOKS_PER_PAGE);
+        for (const singleGenre of book.genres) {
+            if (genreMatch) break;
+            if (singleGenre === filters.genre) { genreMatch = true }
+        }
 
-// Create a book element example (if needed)
-const bookElement = createBookElement('book-id', 'book-image.jpg', 'Book Title', 'Author Name');
+        if (
+            (filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase())) && 
+            (filters.author === 'any' || book.author === filters.author) && 
+            genreMatch
+        ) {
+            result.push(book)
+        }
+    }
 
-// Update the list button label
-updateListButtonLabel();
+    page = 1;
+    matches = result
 
-// Scroll to the top of the page
-scrollToTop();
+    if (result.length < 1) {
+        document.querySelector('[data-list-message]').classList.add('list__message_show')
+    } else {
+        document.querySelector('[data-list-message]').classList.remove('list__message_show')
+    }
 
-// Close the search overlay (if needed)
-closeSearchOverlay();
+    document.querySelector('[data-list-items]').innerHTML = ''
+    const newItems = document.createDocumentFragment()
+
+    for (const { author, id, image, title } of result.slice(0, BOOKS_PER_PAGE)) {
+        const element = document.createElement('button')
+        element.classList = 'preview'
+        element.setAttribute('data-preview', id)
+    
+        element.innerHTML = `
+            <img
+                class="preview__image"
+                src="${image}"
+            />
+            
+            <div class="preview__info">
+                <h3 class="preview__title">${title}</h3>
+                <div class="preview__author">${authors[author]}</div>
+            </div>
+        `
+
+        newItems.appendChild(element)
+    }
+
+    document.querySelector('[data-list-items]').appendChild(newItems)
+    document.querySelector('[data-list-button]').disabled = (matches.length - (page * BOOKS_PER_PAGE)) < 1
+
+    document.querySelector('[data-list-button]').innerHTML = `
+        <span>Show more</span>
+        <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
+    `
+
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    document.querySelector('[data-search-overlay]').open = false
+})
 
 addBooksToPage(matches, authors, page, BOOKS_PER_PAGE);
 
