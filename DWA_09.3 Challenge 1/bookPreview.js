@@ -7,9 +7,9 @@ class bookPreview extends HTMLElement{
     super()
     const shadow =  this.attachShadow({ mode : "closed"})
     
-    connectedCallback(){
-        this.render(;)
-    }
+    connectedCallback()
+        this.render()
+    
 }
 }
 customElements.define("book-preview", bookPreview)
